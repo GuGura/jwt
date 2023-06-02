@@ -67,13 +67,16 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         System.out.println("successfulAuthentication 실행됨: 인증이 완료되었다는 뜻임");
         PrincipalDetails principalDetails = (PrincipalDetails)authResult.getPrincipal();
 
-        //RSA방식은 아니고 Hash암호방식
+        // RSA방식은 아니고 Hash암호방식
         String jwtToken = JWT.create()
                 .withSubject("cos토큰")
                 .withExpiresAt(new Date(System.currentTimeMillis() +JwtProperties.EXPIRATION_TIME)) //만료시간는 짧게 10분설정
                 .withClaim("id",principalDetails.getUser().getId())  //withClaim은 내가 넣고 싶은 비공개 데이터 막넣으면된다.
                 .withClaim("username",principalDetails.getUser().getUsername())
                 .sign(Algorithm.HMAC512(JwtProperties.SECRET));
+        // JWT토큰 만들때 refreshToken 같이 발급해서
+        // 만료됬을 때 관련 method()실행될거고 db에 refreshToken을 확인하고 같으면 다시 둘다 재발급하고 db에 값을 넣는다.
+
         response.addHeader(JwtProperties.HEADER_STRING,JwtProperties.TOKEN_PREFIX + jwtToken);
     }
 
